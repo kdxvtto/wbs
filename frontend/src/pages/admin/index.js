@@ -1,0 +1,8 @@
+export { default as DashboardPage } from './DashboardPage'
+export { default as PengaduanPage } from './PengaduanPage'
+export { default as LaporanPengaduanPage } from './LaporanPengaduanPage'
+export { default as DetailPengaduanPage } from './DetailPengaduanPage'
+export { default as ResponPage } from './ResponPage'
+export { default as LaporanResponPage } from './LaporanResponPage'
+export { default as KategoriPage } from './KategoriPage'
+export { default as UserPage } from './UserPage'
