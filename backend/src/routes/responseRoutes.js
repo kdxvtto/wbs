@@ -12,6 +12,6 @@ router.get("/", verifyToken, checkRole(["Admin", "Pimpinan", "Staf", "Nasabah"])
 router.get("/:id", verifyToken, checkRole(["Admin", "Pimpinan", "Staf", "Nasabah"]), getResponseById);
 router.post("/", verifyToken, checkRole(["Admin", "Pimpinan", "Staf"]), validate(createResponseSchema), createResponse);
 router.put("/:id", verifyToken, checkRole(["Admin", "Pimpinan", "Staf"]), validate(updateResponseSchema), updateResponse);
-router.delete("/:id", verifyToken, checkRole(["Admin", "Pimpinan", "Staf"]), deleteResponse);
+router.delete("/:id", verifyToken, checkRole(["Admin"]), deleteResponse);
 
 export default router;

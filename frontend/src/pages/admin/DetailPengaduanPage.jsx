@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Calendar, User, Tag, FileImage, MessageSquare, Send, Clock, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/molecules'
 import { Button, Input, Label, Badge } from '@/components/atoms'
-import { ConfirmDialog } from '@/components/organisms'
+import { ConfirmDialog, AlertDialog } from '@/components/organisms'
 import { useAuth } from '@/context/AuthContext'
 import api from '@/services/api'
 
@@ -35,6 +35,9 @@ export default function DetailPengaduanPage() {
   const [deleteResponseDialog, setDeleteResponseDialog] = useState({ open: false, id: null })
   const [statusDialog, setStatusDialog] = useState({ open: false, status: null })
   const [deleting, setDeleting] = useState(false)
+  
+  // Alert dialog state
+  const [alertDialog, setAlertDialog] = useState({ open: false, title: '', message: '', variant: 'error' })
 
   const fetchData = async () => {
     try {
@@ -57,6 +60,13 @@ export default function DetailPengaduanPage() {
 
   const handleSubmitResponse = async (e) => {
     e.preventDefault()
+    
+    // Cek jika pengaduan sudah selesai dan bukan admin
+    if (complaint?.status === 'completed' && currentUser?.role !== 'Admin') {
+      setAlertDialog({ open: true, title: 'Tidak Diizinkan', message: 'Pengaduan sudah selesai. Hanya Admin yang dapat menambah respon.', variant: 'warning' })
+      return
+    }
+    
     setSubmitting(true)
 
     try {
@@ -75,7 +85,7 @@ export default function DetailPengaduanPage() {
       fetchData()
     } catch (error) {
       console.error('Error submitting response:', error)
-      alert(error.response?.data?.message || 'Gagal mengirim respon')
+      setAlertDialog({ open: true, title: 'Gagal', message: error.response?.data?.message || 'Gagal mengirim respon', variant: 'error' })
     } finally {
       setSubmitting(false)
     }
@@ -83,7 +93,7 @@ export default function DetailPengaduanPage() {
 
   const handleUpdateStatus = async (newStatus) => {
     if (!isAdmin) {
-      alert('Hanya Admin yang dapat mengubah status')
+      setAlertDialog({ open: true, title: 'Tidak Diizinkan', message: 'Hanya Admin yang dapat mengubah status', variant: 'warning' })
       return
     }
     setDeleting(true)
@@ -93,14 +103,17 @@ export default function DetailPengaduanPage() {
       setStatusDialog({ open: false, status: null })
     } catch (error) {
       console.error('Error updating status:', error)
-      alert('Gagal mengubah status')
+      setAlertDialog({ open: true, title: 'Gagal', message: 'Gagal mengubah status', variant: 'error' })
     } finally {
       setDeleting(false)
     }
   }
 
   const handleDeleteComplaint = async () => {
-    if (!isAdmin) return
+    if (currentUser?.role !== 'Admin') {
+      setAlertDialog({ open: true, title: 'Tidak Diizinkan', message: 'Anda bukan Admin! Hanya Admin yang dapat menghapus pengaduan.', variant: 'error' })
+      return
+    }
     setDeleting(true)
 
     try {
@@ -108,14 +121,21 @@ export default function DetailPengaduanPage() {
       navigate('/dashboard/pengaduan')
     } catch (error) {
       console.error('Error deleting complaint:', error)
-      alert('Gagal menghapus pengaduan')
+      if (error.response?.status === 403) {
+        setAlertDialog({ open: true, title: 'Tidak Diizinkan', message: 'Anda bukan Admin! Hanya Admin yang dapat menghapus pengaduan.', variant: 'error' })
+      } else {
+        setAlertDialog({ open: true, title: 'Gagal', message: error.response?.data?.message || 'Gagal menghapus pengaduan', variant: 'error' })
+      }
     } finally {
       setDeleting(false)
     }
   }
 
   const handleDeleteResponse = async (responseId) => {
-    if (!isAdmin) return
+    if (currentUser?.role !== 'Admin') {
+      setAlertDialog({ open: true, title: 'Tidak Diizinkan', message: 'Anda bukan Admin! Hanya Admin yang dapat menghapus respon.', variant: 'error' })
+      return
+    }
     setDeleting(true)
 
     try {
@@ -124,7 +144,11 @@ export default function DetailPengaduanPage() {
       setDeleteResponseDialog({ open: false, id: null })
     } catch (error) {
       console.error('Error deleting response:', error)
-      alert('Gagal menghapus respon')
+      if (error.response?.status === 403) {
+        setAlertDialog({ open: true, title: 'Tidak Diizinkan', message: 'Anda bukan Admin! Hanya Admin yang dapat menghapus respon.', variant: 'error' })
+      } else {
+        setAlertDialog({ open: true, title: 'Gagal', message: error.response?.data?.message || 'Gagal menghapus respon', variant: 'error' })
+      }
     } finally {
       setDeleting(false)
     }
@@ -159,7 +183,7 @@ export default function DetailPengaduanPage() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Kembali
         </Button>
-        {isAdmin && (
+        {currentUser?.role === 'Admin' && (
           <Button variant="destructive" size="sm" onClick={() => setDeleteComplaintDialog(true)}>
             <Trash2 className="w-4 h-4 mr-2" />
             Hapus Pengaduan
@@ -322,7 +346,7 @@ export default function DetailPengaduanPage() {
                             <span className="text-xs text-muted-foreground">Progress</span>
                             <p className="font-bold text-primary">{res.progress}%</p>
                           </div>
-                          {isAdmin && (
+                          {currentUser?.role === 'Admin' && (
                             <Button 
                               variant="ghost" 
                               size="sm" 
@@ -380,12 +404,24 @@ export default function DetailPengaduanPage() {
             </Card>
           )}
 
-          {/* Add Response - For All */}
+          {/* Add Response - Show form or completed message */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Kirim Respon</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Jika pengaduan sudah selesai dan bukan admin, tampilkan pesan */}
+              {complaint.status === 'completed' && currentUser?.role !== 'Admin' ? (
+                <div className="text-center py-6">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-green-600 text-xl">✓</span>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    Pengaduan sudah selesai.<br/>
+                    Hanya Admin yang dapat menambah respon.
+                  </p>
+                </div>
+              ) : (
               <form onSubmit={handleSubmitResponse} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="response">Pesan Respon</Label>
@@ -439,6 +475,7 @@ export default function DetailPengaduanPage() {
                   )}
                 </Button>
               </form>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -476,6 +513,15 @@ export default function DetailPengaduanPage() {
         variant="warning"
         loading={deleting}
         onConfirm={() => handleUpdateStatus(statusDialog.status)}
+      />
+
+      {/* Alert Dialog for notifications */}
+      <AlertDialog
+        open={alertDialog.open}
+        onOpenChange={(open) => setAlertDialog({ ...alertDialog, open })}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant={alertDialog.variant}
       />
     </div>
   )

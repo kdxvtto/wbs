@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Eye, Search, MessageSquare, Plus, Send, Trash2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/molecules'
 import { Button, Input, Label, Badge } from '@/components/atoms'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/organisms'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, AlertDialog, ConfirmDialog } from '@/components/organisms'
 import { useAuth } from '@/context/AuthContext'
 import api from '@/services/api'
 
@@ -23,6 +23,10 @@ export default function ResponPage() {
     progress: 0,
     status: 'in_progress',
   })
+  
+  // Alert and Confirm dialog states
+  const [alertDialog, setAlertDialog] = useState({ open: false, title: '', message: '', variant: 'error' })
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null })
 
   const fetchData = async () => {
     try {
@@ -72,21 +76,34 @@ export default function ResponPage() {
       fetchData()
     } catch (error) {
       console.error('Error adding response:', error)
-      alert(error.response?.data?.message || 'Gagal menambahkan respon')
+      setAlertDialog({ open: true, title: 'Gagal', message: error.response?.data?.message || 'Gagal menambahkan respon', variant: 'error' })
     } finally {
       setSubmitting(false)
     }
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus respon ini?')) return
-
+    if (currentUser?.role !== 'Admin') {
+      setAlertDialog({ open: true, title: 'Tidak Diizinkan', message: 'Anda bukan Admin! Hanya Admin yang dapat menghapus respon.', variant: 'error' })
+      return
+    }
+    setDeleteDialog({ open: true, id })
+  }
+  
+  const confirmDelete = async () => {
+    const id = deleteDialog.id
+    setDeleteDialog({ open: false, id: null })
+    
     try {
       await api.delete(`/response/${id}`)
       fetchData()
     } catch (error) {
       console.error('Error deleting response:', error)
-      alert(error.response?.data?.message || 'Gagal menghapus respon')
+      if (error.response?.status === 403) {
+        setAlertDialog({ open: true, title: 'Tidak Diizinkan', message: 'Anda bukan Admin! Hanya Admin yang dapat menghapus respon.', variant: 'error' })
+      } else {
+        setAlertDialog({ open: true, title: 'Gagal', message: error.response?.data?.message || 'Gagal menghapus respon', variant: 'error' })
+      }
     }
   }
 
@@ -286,6 +303,26 @@ export default function ResponPage() {
           </form>
         </DialogContent>
       </Dialog>
+      
+      {/* Alert Dialog */}
+      <AlertDialog
+        open={alertDialog.open}
+        onOpenChange={(open) => setAlertDialog({ ...alertDialog, open })}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant={alertDialog.variant}
+      />
+      
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        title="Hapus Respon"
+        description="Apakah Anda yakin ingin menghapus respon ini?"
+        confirmText="Ya, Hapus"
+        variant="danger"
+        onConfirm={confirmDelete}
+      />
     </div>
   )
 }

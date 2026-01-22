@@ -44,6 +44,28 @@ export const register = async (req, res) => {
                 });
             }
         }
+        
+        // Check for existing user with same unique fields
+        const existingUser = await User.findOne({
+            $or : [
+                ...(username ? [{ username }] : []),
+                ...(email ? [{ email }] : []),
+                ...(nik ? [{ nik }] : []),
+                ...(phone ? [{ phone }] : [])
+            ]
+        });
+        if (existingUser) {
+            let duplicateField = '';
+            if (username && existingUser.username === username) duplicateField = 'Username';
+            else if (email && existingUser.email === email) duplicateField = 'Email';
+            else if (nik && existingUser.nik === nik) duplicateField = 'NIK';
+            else if (phone && existingUser.phone === phone) duplicateField = 'Phone number';
+            return res.status(400).json({
+                success : false,
+                message : `${duplicateField} already exists`
+            });
+        }
+        
         const user = await User.create({
             nik,
             name,

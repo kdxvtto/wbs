@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Response from "../models/Response.js";
+import Complaint from "../models/Complaint.js";
 import { createActivityLog } from "./activityLogController.js";
 
 export const getAllResponse = async (req, res) => {
@@ -76,6 +77,24 @@ export const createResponse = async (req, res) => {
                 message : "Complaint id is invalid"
             });
         }
+        
+        // Cek apakah pengaduan sudah selesai
+        const complaint = await Complaint.findById(idComplaint);
+        if (!complaint) {
+            return res.status(404).json({
+                success : false,
+                message : "Complaint not found"
+            });
+        }
+        
+        // Jika pengaduan sudah selesai dan bukan admin, tolak
+        if (complaint.status === 'completed' && req.user.role !== 'Admin') {
+            return res.status(403).json({
+                success : false,
+                message : "Pengaduan sudah selesai. Hanya Admin yang dapat menambah respon."
+            });
+        }
+        
         const newResponse = await Response.create({ 
             idComplaint, 
             idUser : req.user._id, 

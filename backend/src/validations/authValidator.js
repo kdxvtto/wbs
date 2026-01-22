@@ -9,7 +9,7 @@ export const registerUserSchema = z.object({
     email: z.string().regex(safeRegexEmail, "Invalid email address").optional(), // Optional - untuk user/nasabah
     password: z.string().min(6, "Password must be at least 6 characters long"),
     phone: z.string().min(10, "Phone number must be at least 10 characters long").optional(),
-    role: z.enum(["Pimpinan", "Staf", "Nasabah"]),
+    role: z.enum(["Pimpinan", "Staf", "Nasabah"]).optional(),
 });
 
 export const registerAdminSchema = z.object({

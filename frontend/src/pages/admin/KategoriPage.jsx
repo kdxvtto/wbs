@@ -16,7 +16,7 @@ export default function KategoriPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [formData, setFormData] = useState({ name: '', description: '' })
+  const [formData, setFormData] = useState({ name: '' })
   const [submitting, setSubmitting] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null, name: '' })
   const [deleting, setDeleting] = useState(false)
@@ -43,14 +43,14 @@ export default function KategoriPage() {
   const openAddDialog = () => {
     setEditMode(false)
     setSelectedCategory(null)
-    setFormData({ name: '', description: '' })
+    setFormData({ name: '' })
     setDialogOpen(true)
   }
 
   const openEditDialog = (category) => {
     setEditMode(true)
     setSelectedCategory(category)
-    setFormData({ name: category.name, description: category.description || '' })
+    setFormData({ name: category.name })
     setDialogOpen(true)
   }
 
@@ -134,7 +134,6 @@ export default function KategoriPage() {
               <tr>
                 <th className="text-left p-4 font-medium text-muted-foreground">No</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Nama Kategori</th>
-                <th className="text-left p-4 font-medium text-muted-foreground">Deskripsi</th>
                 {isAdmin && (
                   <th className="text-left p-4 font-medium text-muted-foreground">Aksi</th>
                 )}
@@ -143,7 +142,7 @@ export default function KategoriPage() {
             <tbody>
               {filteredCategories.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 4 : 3} className="p-8 text-center text-muted-foreground">
+                  <td colSpan={isAdmin ? 3 : 2} className="p-8 text-center text-muted-foreground">
                     Tidak ada kategori
                   </td>
                 </tr>
@@ -152,7 +151,6 @@ export default function KategoriPage() {
                   <tr key={category._id} className="border-t border-border hover:bg-muted/30 transition-colors">
                     <td className="p-4 text-muted-foreground">{index + 1}</td>
                     <td className="p-4 font-medium text-foreground">{category.name}</td>
-                    <td className="p-4 text-muted-foreground">{category.description || '-'}</td>
                     {isAdmin && (
                       <td className="p-4">
                         <div className="flex gap-2">
@@ -189,17 +187,6 @@ export default function KategoriPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Masukkan nama kategori"
                   required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Deskripsi</Label>
-                <textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Masukkan deskripsi (opsional)"
-                  rows={3}
-                  className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
                 />
               </div>
               <DialogFooter>

@@ -34,6 +34,7 @@ export {
 } from './navigation-menu'
 export { ProtectedRoute, GuestRoute } from './ProtectedRoute'
 export { ConfirmDialog } from './ConfirmDialog'
+export { AlertDialog } from './AlertDialog'
 export { Navbar } from './Navbar'
 export { Hero } from './Hero'
 export { Features } from './Features'

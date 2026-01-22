@@ -38,6 +38,9 @@ export const deleteCloudinaryImage = async (public_id, resource_type = "image") 
 }
 
 export const getPublicIdFromUrl = (url) => {
-    const match = url.match(/\/v\d+\/([^/]+)/);
+    // Match everything after /v[version]/ until the file extension
+    // Example: https://res.cloudinary.com/xxx/image/upload/v1234/bankwonogiri/complaints/abc123.jpg
+    // Should return: bankwonogiri/complaints/abc123
+    const match = url.match(/\/v\d+\/(.+)\.[a-zA-Z]+$/);
     return match ? match[1] : null;
 }

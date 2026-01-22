@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
-import { generateToken } from "../utils/generateToken.js";
+import { generateToken, generateRefreshToken } from "../utils/generateToken.js";
 
 export const refreshToken = async (req, res) => {
     try{
@@ -18,15 +18,32 @@ export const refreshToken = async (req, res) => {
                 message : "User not found"
             });
         }
-        const verifyUser = jwt.verify(refreshedToken, process.env.JWT_REFRESH_SECRET);
-        const generateTokenUser = generateToken({ id : verifyUser.id });
+        // Verify token validity (will throw error if expired/invalid)
+        jwt.verify(refreshedToken, process.env.JWT_REFRESH_SECRET);
+        
+        // Generate new access token dengan id dan role
+        const newAccessToken = generateToken({ id: user._id, role: user.role });
+        
+        // Generate new refresh token dengan id dan role
+        const newRefreshToken = generateRefreshToken({ id: user._id, role: user.role });
+        
+        // Simpan refresh token baru ke database
+        user.refreshToken = newRefreshToken;
+        await user.save();
+        
+        // Set cookie baru untuk refresh token
+        res.cookie("refreshToken", newRefreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
 
         res.status(200).json({
             success : true,
-            message : "Refresh token generated successfully",
+            message : "Token refreshed successfully",
             data : {
-                token : generateTokenUser,
-                refreshToken : generateTokenUser
+                accessToken : newAccessToken
             }
         })
     }catch(error){

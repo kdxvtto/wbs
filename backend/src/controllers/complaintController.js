@@ -65,7 +65,10 @@ export const getComplaintById = async (req, res) => {
 }
 
 export const createComplaint = async (req, res) => {
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    // === LOCAL STORAGE (comment when using Cloudinary) ===
+    // const imagePaths = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+    // === CLOUDINARY (uncomment when using Cloudinary) ===
+    const imagePaths = req.files ? req.files.map(f => f.path) : [];
     try {
         const { category, location, condition, description } = req.body;
         if (!category || !location || !condition || !description) {
@@ -80,7 +83,7 @@ export const createComplaint = async (req, res) => {
             location, 
             condition, 
             description, 
-            image: imagePath ? [imagePath] : [] 
+            image: imagePaths 
         });
         
         // Log activity
@@ -100,10 +103,21 @@ export const createComplaint = async (req, res) => {
         });
     } catch (error) {
         console.error("Create Complaint Error:", error);
-        if (image) {
-            const public_id = getPublicIdFromUrl(image);
-            deleteCloudinaryImage(public_id);
+        // === CLOUDINARY (uncomment when using Cloudinary) ===
+        if (imagePaths.length > 0) {
+            for (const imgPath of imagePaths) {
+                const public_id = getPublicIdFromUrl(imgPath);
+                deleteCloudinaryImage(public_id);
+            }
         }
+
+        // === LOCAL STORAGE (comment when using Cloudinary) ===
+        // if (imagePaths.length > 0) {
+        //     const { removeFile } = await import("../utils/file.js");
+        //     for (const imgPath of imagePaths) {
+        //         await removeFile(imgPath);
+        //     }
+        // }
         res.status(500).json({
             success : false,
             message : error.message
@@ -112,10 +126,20 @@ export const createComplaint = async (req, res) => {
 }
 
 export const updateComplaint = async (req, res) => {
-    const newImage = req.file ? `/uploads/${req.file.filename}` : null;
+    // === LOCAL STORAGE (comment when using Cloudinary) ===
+    // const newImages = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+    // === CLOUDINARY (uncomment when using Cloudinary) ===
+    const newImages = req.files ? req.files.map(f => f.path) : [];
     try {
         const { id } = req.params;
         if(!mongoose.Types.ObjectId.isValid(id)){
+            // Cleanup uploaded images if validation fails
+            if(newImages.length > 0){
+                for (const img of newImages) {
+                    const public_id = getPublicIdFromUrl(img);
+                    deleteCloudinaryImage(public_id);
+                }
+            }
             return res.status(400).json({
                 success : false,
                 message : "Complaint id is invalid"
@@ -124,25 +148,39 @@ export const updateComplaint = async (req, res) => {
         
         const complaint = await Complaint.findById(id);
         if (!complaint) {
+            // Cleanup uploaded images if complaint not found
+            if(newImages.length > 0){
+                for (const img of newImages) {
+                    const public_id = getPublicIdFromUrl(img);
+                    deleteCloudinaryImage(public_id);
+                }
+            }
             return res.status(404).json({
                 success : false,
                 message : "Complaint not found"
             });
         }
 
-        // Update fields from request body
-        const { category, location, condition, description, status } = req.body;
-        if (category) complaint.category = category;
-        if (location) complaint.location = location;
-        if (condition) complaint.condition = condition;
-        if (description) complaint.description = description;
-        if (status) complaint.status = status;
-        if (newImage) {
-            complaint.image = complaint.image || [];
-            complaint.image.push(newImage);
+        // === CLOUDINARY (uncomment when using Cloudinary) ===
+        const oldImages = complaint.image || [];
+        if (newImages.length > 0) {
+            // Replace old images with new ones
+            complaint.image = newImages;
         }
-
+        Object.assign(complaint, req.body);
         await complaint.save();
+
+        // Delete old images from Cloudinary after successful update
+        if(newImages.length > 0 && oldImages.length > 0){
+            for (const img of oldImages) {
+                const public_id = getPublicIdFromUrl(img);
+                deleteCloudinaryImage(public_id);
+            }
+        }
+        // === LOCAL STORAGE (comment when using Cloudinary) ===
+        // if (newImages.length > 0) {
+        //     complaint.image = newImages;
+        // }
         
         // Log activity
         await createActivityLog({
@@ -161,6 +199,13 @@ export const updateComplaint = async (req, res) => {
         });
     } catch (error) {
         console.error('Update Complaint Error:', error);
+        // Cleanup uploaded images on error
+        if(newImages.length > 0){
+            for (const img of newImages) {
+                const public_id = getPublicIdFromUrl(img);
+                deleteCloudinaryImage(public_id);
+            }
+        }
         res.status(500).json({
             success : false,
             message : error.message
@@ -185,21 +230,23 @@ export const deleteComplaint = async (req, res) => {
             });
         }
         // === CLOUDINARY (uncomment when using Cloudinary) ===
-        // if(complaint.image){
-        //     const public_id = getPublicIdFromUrl(complaint.image);
-        //     deleteCloudinaryImage(public_id);
-        // }
+        if(complaint.image && complaint.image.length > 0){
+            for (const img of complaint.image) {
+                const public_id = getPublicIdFromUrl(img);
+                deleteCloudinaryImage(public_id);
+            }
+        }
 
         // === LOCAL STORAGE (comment when using Cloudinary) ===
-        if(complaint.image && Array.isArray(complaint.image)){
-            const { removeFile } = await import("../utils/file.js");
-            for (const img of complaint.image) {
-                await removeFile(img);
-            }
-        } else if (complaint.image && typeof complaint.image === 'string') {
-            const { removeFile } = await import("../utils/file.js");
-            await removeFile(complaint.image);
-        }
+        // if(complaint.image && Array.isArray(complaint.image)){
+        //     const { removeFile } = await import("../utils/file.js");
+        //     for (const img of complaint.image) {
+        //         await removeFile(img);
+        //     }
+        // } else if (complaint.image && typeof complaint.image === 'string') {
+        //     const { removeFile } = await import("../utils/file.js");
+        //     await removeFile(complaint.image);
+        // }
         // Log activity
         await createActivityLog({
             action: 'delete',

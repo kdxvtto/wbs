@@ -1,4 +1,8 @@
-import { removeFile } from "../utils/file.js";
+// === LOCAL STORAGE (comment when using Cloudinary) ===
+// import { removeFile } from "../utils/file.js";
+
+// === CLOUDINARY (uncomment when using Cloudinary) ===
+import { deleteCloudinaryImage, getPublicIdFromUrl } from "../config/cloudinary.js";
 
 const cleanupUploadedFiles = async (req) => {
   // Kumpulkan semua file yang mungkin dikirim (single, array, atau fields object)
@@ -12,8 +16,20 @@ const cleanupUploadedFiles = async (req) => {
     });
   }
 
+  // === LOCAL STORAGE (comment when using Cloudinary) ===
+  // await Promise.all(
+  //   files.map((file) => removeFile(file.path || file.filename))
+  // );
+
+  // === CLOUDINARY (uncomment when using Cloudinary) ===
   await Promise.all(
-    files.map((file) => removeFile(file.path || file.filename))
+    files.map((file) => {
+      if (file.path) {
+        const public_id = getPublicIdFromUrl(file.path);
+        return deleteCloudinaryImage(public_id);
+      }
+      return Promise.resolve();
+    })
   );
 };
 

@@ -137,13 +137,13 @@ api.interceptors.response.use(
         });
         
         // Ambil access token baru dari response
-        const { token } = response.data.data;
+        const { accessToken } = response.data.data;
         
         // Simpan token baru ke localStorage
-        localStorage.setItem("token", token);
+        localStorage.setItem("token", accessToken);
         
         // Update header Authorization dengan token baru
-        originalRequest.headers.Authorization = `Bearer ${token}`;
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         
         // Ulangi request yang gagal tadi dengan token baru
         return api(originalRequest);
