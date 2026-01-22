@@ -1,0 +1,13 @@
+{
+  "name": "wbs-monorepo",
+  "version": "1.0.0",
+  "description": "WBS Application - Backend API",
+  "scripts": {
+    "start": "cd backend && npm run start",
+    "install": "cd backend && npm install",
+    "postinstall": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
