@@ -1,5 +1,5 @@
 import { AlertTriangle, XCircle, CheckCircle, Info } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/organisms'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './dialog'
 import { Button } from '@/components/atoms'
 
 /**

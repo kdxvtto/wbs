@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { Menu, X, ChevronDown, FileText, Shield, AlertCircle, User, LogOut } from 'lucide-react'
 import { Button } from '@/components/atoms'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/organisms'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './dialog'
 import { useAuth } from '@/context/AuthContext'
 import { cn } from '@/lib/utils'
 
