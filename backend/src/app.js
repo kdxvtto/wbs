@@ -38,6 +38,11 @@ app.use(helmetMiddleware);
 // Static files for uploads
 app.use("/uploads", express.static(path.resolve(__dirname, "..", "public", "uploads")));
 
+// Health Check Endpoint
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 // Routes
 app.use("/api/activity", activityLogRoutes);
 app.use("/api/auth", authRoutes);
