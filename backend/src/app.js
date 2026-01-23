@@ -30,6 +30,9 @@ app.get("/health", (req, res) => {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+// Trust proxy for Railway/Vercel (required for rate limiter to work correctly)
+app.set("trust proxy", 1);
+
 // Middleware - CORS must be FIRST before rate limiter
 app.use(corsMiddleware);
 
