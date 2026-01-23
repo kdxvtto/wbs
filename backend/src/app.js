@@ -25,6 +25,11 @@ dotenv.config({ path: path.resolve(__dirname, `../${envFile}`) });
 
 const app = express();
 
+// Health Check Endpoint - MUST be before all middleware for Railway health checks
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 // Middleware - CORS must be FIRST before rate limiter
 app.use(corsMiddleware);
 
@@ -37,11 +42,6 @@ app.use(helmetMiddleware);
 
 // Static files for uploads
 app.use("/uploads", express.static(path.resolve(__dirname, "..", "public", "uploads")));
-
-// Health Check Endpoint
-app.get("/health", (req, res) => {
-    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
-});
 
 // Routes
 app.use("/api/activity", activityLogRoutes);
