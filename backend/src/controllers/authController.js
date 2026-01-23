@@ -6,54 +6,18 @@ import { blacklistToken } from "../utils/blacklistToken.js";
 
 export const register = async (req, res) => {
     try {
-        const {nik, name, username, email, password, phone, role} = req.body;
-        // Validate role is provided
-        if (!role) {
-            return res.status(400).json({
-                success : false,
-                message : "Role is required"
-            });
-        }
-        if(role === "Admin" || role === "Pimpinan" || role === "Staf"){
-            if(!name || !username || !password){
-                return res.status(400).json({
-                    success : false,
-                    message : "Name, username and password are required for Admin, Pimpinan and Staf"
-                });
-            }
-            // Admin, Pimpinan, Staf tidak boleh punya email, nik, dan phone
-            if (email || nik || phone) {
-                return res.status(400).json({
-                    success : false,
-                    message : "Admin, Pimpinan and Staf cannot have email, NIK, or phone"
-                });
-            }
-        }
-        if(role === "Nasabah"){
-            if(!nik || !name || !email || !password || !phone){
-                return res.status(400).json({
-                    success : false,
-                    message : "NIK, name, email, password and phone are required for Nasabah"
-                });
-            }
-            // Nasabah tidak boleh punya username
-            if (username) {
-                return res.status(400).json({
-                    success : false,
-                    message : "Nasabah cannot have username"
-                });
-            }
-        }
+        const { nik, name, username, email, password, phone, role } = req.body;
         
         // Check for existing user with same unique fields
         const existingUser = await User.findOne({
-            $or : [
+            $or: [
                 ...(username ? [{ username }] : []),
                 ...(email ? [{ email }] : []),
                 ...(nik ? [{ nik }] : []),
                 ...(phone ? [{ phone }] : [])
             ]
         });
+        
         if (existingUser) {
             let duplicateField = '';
             if (username && existingUser.username === username) duplicateField = 'Username';
@@ -61,33 +25,34 @@ export const register = async (req, res) => {
             else if (nik && existingUser.nik === nik) duplicateField = 'NIK';
             else if (phone && existingUser.phone === phone) duplicateField = 'Phone number';
             return res.status(400).json({
-                success : false,
-                message : `${duplicateField} already exists`
+                success: false,
+                message: `${duplicateField} already exists`
             });
         }
         
+        // Create user - Model handles default role ("Nasabah") and password hashing
         const user = await User.create({
             nik,
             name,
-            username : username || undefined,
-            email : email || undefined,
+            username: username || undefined,
+            email: email || undefined,
             password,
-            role, 
+            role,
             phone
-            });
+        });
+        
         const safeUser = user.toObject();
         delete safeUser.password;
+        
         res.status(201).json({
-            success : true,
-            message : "User registered successfully",
-            data : {
-                user : safeUser,
-            }
+            success: true,
+            message: "User registered successfully",
+            data: { user: safeUser }
         });
     } catch (error) {
         res.status(500).json({
-            success : false,
-            message : error.message
+            success: false,
+            message: error.message
         });
     }
 }
