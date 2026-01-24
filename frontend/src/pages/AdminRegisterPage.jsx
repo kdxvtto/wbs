@@ -44,7 +44,7 @@ export default function AdminRegisterPage() {
 
     try {
       const { confirmPassword, ...registerData } = formData
-      await register(registerData, 'admin')
+      await register({ ...registerData, role: 'Admin' }, 'admin')
       navigate('/hanomanbpr/login', { state: { message: 'Registrasi berhasil! Silakan login.' } })
     } catch (err) {
       setError(err.response?.data?.message || 'Registrasi gagal. Silakan coba lagi.')
