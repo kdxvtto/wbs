@@ -45,7 +45,7 @@ export default function AdminRegisterPage() {
     try {
       const { confirmPassword, ...registerData } = formData
       await register(registerData, 'admin')
-      navigate('/admin/login', { state: { message: 'Registrasi berhasil! Silakan login.' } })
+      navigate('/hanomanbpr/login', { state: { message: 'Registrasi berhasil! Silakan login.' } })
     } catch (err) {
       setError(err.response?.data?.message || 'Registrasi gagal. Silakan coba lagi.')
     } finally {
@@ -159,7 +159,7 @@ export default function AdminRegisterPage() {
             <div className="mt-6 pt-4 border-t border-border text-center">
               <p className="text-sm text-muted-foreground">
                 Sudah punya akun?{' '}
-                <Link to="/admin/login" className="text-primary font-medium hover:underline">
+                <Link to="/hanomanbpr/login" className="text-primary font-medium hover:underline">
                   Masuk
                 </Link>
               </p>

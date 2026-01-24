@@ -70,7 +70,7 @@ export function ProtectedRoute({ children, allowedRoles = [] }) {
     /**
      * SMART REDIRECT BERDASARKAN ROLE
      * 
-     * Jika user belum login dan mencoba akses halaman admin → redirect ke /admin/login
+     * Jika user belum login dan mencoba akses halaman admin → redirect ke /hanomanbpr/login
      * Jika user belum login dan mencoba akses halaman nasabah → redirect ke /login
      * 
      * Cara kerja:
@@ -79,7 +79,7 @@ export function ProtectedRoute({ children, allowedRoles = [] }) {
      * - Jika tidak, ini adalah route user biasa → redirect ke login biasa
      */
     const isAdminRoute = allowedRoles.some(role => ['Admin', 'Pimpinan', 'Staf'].includes(role))
-    const loginPath = isAdminRoute ? '/admin/login' : '/login'
+    const loginPath = isAdminRoute ? '/hanomanbpr/login' : '/login'
     
     /**
      * Navigate component = cara declarative untuk redirect di React

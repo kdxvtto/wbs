@@ -121,7 +121,7 @@ export function AuthProvider({ children }) {
    * - Fungsi ini TIDAK melakukan navigate
    * - Navigasi ditangani oleh komponen yang memanggil (AdminLayout/UserLayout)
    * - Ini karena setiap layout punya tujuan redirect berbeda:
-   *   - AdminLayout → /admin/login
+   *   - AdminLayout → /hanomanbpr/login
    *   - UserLayout → /login
    */
   const logout = async () => {

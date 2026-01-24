@@ -58,6 +58,7 @@ const HomePage = lazy(() => import('@/pages/HomePage'))
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const AdminLoginPage = lazy(() => import('@/pages/AdminLoginPage'))
+const AdminRegisterPage = lazy(() => import('@/pages/AdminRegisterPage'))
 const HubungiKamiPage = lazy(() => import('@/pages/HubungiKamiPage'))
 
 // Admin pages (hanya untuk Admin, Pimpinan, Staf)
@@ -169,9 +170,14 @@ function App() {
         } />
 
         {/* Guest Routes - Admin Auth */}
-        <Route path="/admin/login" element={
+        <Route path="/hanomanbpr/login" element={
           <GuestRoute>
             <AdminLoginPage />
+          </GuestRoute>
+        } />
+        <Route path="/hanomanbpr/register" element={
+          <GuestRoute>
+            <AdminRegisterPage />
           </GuestRoute>
         } />
         

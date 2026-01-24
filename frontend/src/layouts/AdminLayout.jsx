@@ -159,13 +159,13 @@ export default function AdminLayout({ children }) {
   /**
    * Handle Logout
    * 
-   * PENTING: Redirect ke /admin/login (bukan /login)
+   * PENTING: Redirect ke /hanomanbpr/login (bukan /login)
    * karena ini adalah layout untuk Admin/Pimpinan/Staf
    */
   const handleLogout = async () => {
     setLoggingOut(true)        // Set loading state
     await logout()             // Panggil fungsi logout dari context
-    navigate('/admin/login')    // Redirect ke admin login
+    navigate('/hanomanbpr/login')    // Redirect ke admin login
   }
 
   /**
