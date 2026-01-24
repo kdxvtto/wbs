@@ -86,7 +86,7 @@ export function AuthProvider({ children }) {
    */
   const login = async (credentials, type = 'admin') => {
     // Pilih endpoint berdasarkan tipe user
-    const endpoint = type === 'admin' ? '/auth/login/admin' : '/auth/login/user'
+    const endpoint = type === 'admin' ? '/hanomanbpr/login' : '/auth/login/user'
     
     // POST request dengan credentials
     const response = await api.post(endpoint, credentials)
@@ -109,7 +109,7 @@ export function AuthProvider({ children }) {
    * @param {string} type - 'admin' atau 'user'
    */
   const register = async (userData, type = 'admin') => {
-    const endpoint = type === 'admin' ? '/auth/register/admin' : '/auth/register/user'
+    const endpoint = type === 'admin' ? '/hanomanbpr/register' : '/auth/register/user'
     const response = await api.post(endpoint, userData)
     return response.data
   }
