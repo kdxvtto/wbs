@@ -237,8 +237,8 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
+    // Set password langsung - Model pre-save hook akan handle hashing
+    user.password = newPassword;
     await user.save();
 
     return res.status(200).json({
