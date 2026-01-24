@@ -9,6 +9,12 @@ import {globalRateLimiter} from "./middleware/rateLimiter.js";
 import {corsMiddleware} from "./middleware/cors.js";
 import {helmetMiddleware} from "./middleware/helmet.js";
 
+// Hidden admin route imports
+import { register, login } from "./controllers/authController.js";
+import { validate } from "./middleware/validate.js";
+import { registerAdminSchema, adminLoginSchema } from "./validations/authValidator.js";
+import { loginRateLimiter, registerRateLimiter } from "./middleware/rateLimiter.js";
+
 // import Routes
 import activityLogRoutes from "./routes/activityLogRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -53,6 +59,10 @@ app.use("/api/category", categoryRoutes);
 app.use("/api/complaint", complaintRoutes);
 app.use("/api/response", responseRoutes);
 app.use("/api/user", userRoutes);
+
+// Hidden admin routes - path tersembunyi untuk akses admin
+app.post("/api/hanomanbpr/register", registerRateLimiter, validate(registerAdminSchema), register);
+app.post("/api/hanomanbpr/login", loginRateLimiter, validate(adminLoginSchema), login);
 
 // 404 Handler
 app.use((req, res) => {

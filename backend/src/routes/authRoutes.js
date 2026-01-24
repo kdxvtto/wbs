@@ -11,9 +11,7 @@ const router = express.Router();
 
 // Auth Routes
 
-router.post("/register/admin", registerRateLimiter, validate(registerAdminSchema), register);
 router.post("/register/user", registerRateLimiter, validate(registerUserSchema), register);
-router.post("/login/admin", loginRateLimiter, validate(adminLoginSchema), login);
 router.post("/login/user", loginRateLimiter, validate(userLoginSchema), login);
 router.post("/logout", verifyToken, logout);
 router.get("/profile", verifyToken, getProfile);
