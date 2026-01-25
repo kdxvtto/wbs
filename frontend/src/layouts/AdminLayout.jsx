@@ -77,6 +77,12 @@ const menuItems = [
     href: '/dashboard/kategori',
     icon: FolderOpen,
   },
+  {
+    name: 'User',
+    href: '/dashboard/user',
+    icon: Users,
+    allowedRoles: ['Admin'],
+  },
 ]
 
 /**
@@ -236,8 +242,14 @@ export default function AdminLayout({ children }) {
             2. Menu biasa → render sebagai link langsung
         ===================================================== */}
         <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100vh-8rem)]">
-          {menuItems.map((item) => (
-            <div key={item.name}>
+          {menuItems.map((item) => {
+            // Check allowedRoles
+            if (item.allowedRoles && !item.allowedRoles.includes(user?.role)) {
+              return null
+            }
+            
+            return (
+              <div key={item.name}>
               {item.children ? (
                 // MENU DENGAN SUBMENU
                 <>
@@ -299,8 +311,9 @@ export default function AdminLayout({ children }) {
                   {item.name}
                 </Link>
               )}
-            </div>
-          ))}
+              </div>
+            )
+          })}
         </nav>
 
         {/* =====================================================
