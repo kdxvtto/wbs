@@ -77,11 +77,6 @@ const menuItems = [
     href: '/dashboard/kategori',
     icon: FolderOpen,
   },
-  {
-    name: 'User',
-    href: '/dashboard/user',
-    icon: Users,
-  },
 ]
 
 /**
