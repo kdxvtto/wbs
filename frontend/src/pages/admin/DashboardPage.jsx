@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { FileText, MessageSquare, Users, CheckCircle, Clock, AlertCircle, Activity } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/molecules'
 import api from '@/services/api'
+import { useAuth } from '@/context/AuthContext'
 
 function StatCard({ title, value, icon: Icon, description, color = 'primary' }) {
   const colorClasses = {
@@ -45,6 +46,7 @@ const resourceLabels = {
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const [stats, setStats] = useState({
     totalComplaints: 0,
     pendingComplaints: 0,
@@ -71,9 +73,11 @@ export default function DashboardPage() {
         const responsesRes = await api.get('/response')
         const responses = responsesRes.data.data || []
 
-        // Fetch activity logs
-        const activityRes = await api.get('/activity?limit=10')
-        setActivityLogs(activityRes.data.data || [])
+        // Fetch activity logs - Only for Admin
+        if (user?.role === 'Admin') {
+          const activityRes = await api.get('/activity?limit=10')
+          setActivityLogs(activityRes.data.data || [])
+        }
 
         setStats({
           totalComplaints: complaints.length,
@@ -166,55 +170,57 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Activity Log */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="w-5 h-5 text-primary" />
-            Aktivitas Terbaru
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {activityLogs.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Belum ada aktivitas
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {activityLogs.map((log) => {
-                const action = actionLabels[log.action] || { label: log.action, color: 'bg-gray-100 text-gray-700' }
-                const resource = resourceLabels[log.resource] || log.resource
+      {/* Activity Log - Only for Admin */}
+      {user?.role === 'Admin' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-primary" />
+              Aktivitas Terbaru
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {activityLogs.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                Belum ada aktivitas
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {activityLogs.map((log) => {
+                  const action = actionLabels[log.action] || { label: log.action, color: 'bg-gray-100 text-gray-700' }
+                  const resource = resourceLabels[log.resource] || log.resource
 
-                return (
-                  <div key={log._id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-medium text-primary">
-                        {log.userName?.charAt(0) || 'U'}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm">
-                        <span className="font-medium text-foreground">{log.userName}</span>
-                        {' '}
-                        <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${action.color}`}>
-                          {action.label}
+                  return (
+                    <div key={log._id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-medium text-primary">
+                          {log.userName?.charAt(0) || 'U'}
                         </span>
-                        {' '}
-                        <span className="text-muted-foreground">{resource}:</span>
-                        {' '}
-                        <span className="text-foreground">{log.resourceName}</span>
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatTimeAgo(log.createdAt)}
-                      </p>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm">
+                          <span className="font-medium text-foreground">{log.userName}</span>
+                          {' '}
+                          <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${action.color}`}>
+                            {action.label}
+                          </span>
+                          {' '}
+                          <span className="text-muted-foreground">{resource}:</span>
+                          {' '}
+                          <span className="text-foreground">{log.resourceName}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {formatTimeAgo(log.createdAt)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  )
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
