@@ -8,8 +8,8 @@ import { createUserSchema, updateUserSchema } from "../validations/userValidator
 const router = express.Router();
 
 // User Routes
-router.get("/", verifyToken, checkRole(["Admin", "Pimpinan", "Staf"]), getAllUser);
-router.get("/:id", verifyToken, checkRole(["Admin", "Pimpinan", "Staf"]), getUserById);
+router.get("/", verifyToken, checkRole(["Admin"]), getAllUser);
+router.get("/:id", verifyToken, checkRole(["Admin"]), getUserById);
 router.post("/", verifyToken, checkRole(["Admin"]), validate(createUserSchema), createUser);
 router.put("/:id", verifyToken, checkRole(["Admin"]), validate(updateUserSchema), updateUser);
 router.delete("/:id", verifyToken, checkRole(["Admin"]), deleteUser);
